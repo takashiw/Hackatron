@@ -1,0 +1,14 @@
+I"?(function() {
+  $(document).on('page:load ready', function() {
+    return $("table.diff").prettyTextDiff(function() {
+      return {
+        cleanup: true,
+        originalContainer: 'tr td.original',
+        changedContainer: 'tr td.changed',
+        diffContainer: 'tr td.diff'
+      };
+    });
+  });
+
+}).call(this);
+:ET

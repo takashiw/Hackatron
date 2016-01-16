@@ -1,0 +1,38 @@
+I"˜(function() {
+  (function($) {
+    window.CMS || (window.CMS = {});
+    return window.CMS.files = function() {
+      var modal;
+      modal = $('.cms-files-modal');
+      $('.cms-files-open-modal').on('click', function(e) {
+        modal.on('show.bs.modal', function() {
+          var iframe, iframeSrc;
+          iframe = modal.find('iframe');
+          iframeSrc = modal.data('iframe-src');
+          if (iframe.attr('src') !== iframeSrc) {
+            return iframe.attr('src', iframeSrc);
+          }
+        });
+        modal.modal({
+          show: true
+        });
+        return e.preventDefault();
+      });
+      modal.on('show.bs.modal', function(e) {
+        var height;
+        height = $(window).height() - 60;
+        return $(e.target).find('.modal-content').css('height', height + "px");
+      });
+      $(window).on('resize', function() {
+        var height;
+        height = $(window).height() - 60;
+        return modal.find('.modal-content').css('height', height + "px");
+      });
+      return $(document).on('click', '.cms-uploader-filelist input[type=text]', function() {
+        return $(this).select();
+      });
+    };
+  })(jQuery);
+
+}).call(this);
+:ET

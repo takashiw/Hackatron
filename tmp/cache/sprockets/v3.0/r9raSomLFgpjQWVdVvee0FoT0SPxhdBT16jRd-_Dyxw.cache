@@ -1,0 +1,104 @@
+I" (function() {
+  (function($, o) {
+    window.CMS || (window.CMS = {});
+    return window.CMS.uploader = function(target, settings) {
+      var addFile, id, removeFile, updateFileStatus, uploader;
+      addFile = function(file) {
+        var fileList;
+        fileList = $(".cms-uploader-filelist", target);
+        fileList.prepend("<tr id='" + file.id + "' class='temp'> <td><div class='icon'></div></td> <td class='main' colspan=2> <div class='progress'> <div class='progress-bar progress-bar-striped active'> <span>" + file.name + "</span> </div> </div> </td> <td> <a class='btn btn-sm btn-danger pull-right cms-uploader-file-delete' href='#'>Delete</a> </td> </tr>");
+        $("#" + file.id + " a.cms-uploader-file-delete").click(function(e) {
+          uploader.removeFile(file);
+          return e.preventDefault();
+        });
+        return updateFileStatus(file);
+      };
+      removeFile = function(file) {
+        return $("#" + file.id).remove();
+      };
+      updateFileStatus = function(file) {
+        var progress_bar;
+        progress_bar = $("#" + file.id + " .progress-bar", target);
+        if (file.status === plupload.UPLOADING) {
+          progress_bar.css('width', file.percent + "%");
+        }
+        if (file.status === plupload.FAILED) {
+          progress_bar.css('width', '100%').addClass('progress-bar-danger');
+          return $('span', progress_bar).html(file.error_message);
+        }
+      };
+      uploader = void 0;
+      id = target.attr("id");
+      if (!id) {
+        id = plupload.guid();
+        target.attr('id', id);
+      }
+      settings = $.extend({
+        runtimes: "html5,browserplus,silverlight,flash,gears",
+        dragdrop: true,
+        drop_element: id + "-drag-drop-target",
+        browse_button: id + "-browse",
+        container: id,
+        file_data_name: "file[file]"
+      }, settings);
+      uploader = new plupload.Uploader(settings);
+      uploader.bind("PostInit", function(up) {
+        var drop_element;
+        if (up.settings.dragdrop && up.features.dragdrop) {
+          drop_element = $(up.settings.drop_element);
+          $(document).bind('dragenter', function(e) {
+            return drop_element.addClass('cms-uploader-drag-drop-target-active');
+          });
+          return drop_element.bind('drop dragleave', function(e) {
+            return drop_element.removeClass('cms-uploader-drag-drop-target-active');
+          });
+        } else {
+          return $('.cms-uploader-drag-drop-info', target).hide();
+        }
+      });
+      uploader.bind('Error', function(up, err) {
+        var file, message;
+        file = err.file;
+        message = void 0;
+        if (file) {
+          message = err.response;
+          if (!message) {
+            message = err.message;
+            if (err.details) {
+              message += " (" + err.details + ")";
+            }
+          }
+          file.status = plupload.FAILED;
+          file.error_message = message;
+          updateFileStatus(file);
+        }
+        if (err.code === plupload.INIT_ERROR) {
+          return alert(_('Error: Initialisation error. Reload to try again.'));
+        }
+      });
+      uploader.init();
+      uploader.bind('FilesAdded', function(up, files) {
+        $.each(files, function(i, file) {
+          return addFile(file);
+        });
+        return uploader.start();
+      });
+      uploader.bind('UploadProgress', function(up, file) {
+        return updateFileStatus(file);
+      });
+      uploader.bind("FileUploaded", function(up, file, info) {
+        return $("tr#" + file.id).replaceWith(info.response);
+      });
+      uploader.bind('FilesRemoved', function(up, files) {
+        return $.each(files, function(i, file) {
+          return removeFile(file);
+        });
+      });
+      if (settings.setup) {
+        return settings.setup(uploader);
+      }
+    };
+  })(jQuery, mOxie);
+
+}).call(this);
+:ET
